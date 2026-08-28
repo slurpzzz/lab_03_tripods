@@ -8,6 +8,8 @@ when sub-list sizes fall at or below a specified threshold (k).
 
 author: YOUR NAME HERE
 """
+from tripod import Tripod
 
-def hybrid_sort(data: list, k: int) -> list:
+
+def hybrid_sort(data: list[Tripod], k: int) -> list[Tripod]:
     pass
