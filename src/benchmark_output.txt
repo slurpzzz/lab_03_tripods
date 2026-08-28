@@ -1,0 +1,1 @@
+Include here the output of the test_hybrid_performance test file.
