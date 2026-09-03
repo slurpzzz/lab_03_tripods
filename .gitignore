@@ -1,0 +1,7 @@
+# .gitignore
+.idea/
+*.iml
+
+# Python bytecode / cache files
+__pycache__/
+*.pyc
