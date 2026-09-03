@@ -1,4 +1,4 @@
-m<component name="ProjectRunConfigurationManager">
+<component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Python tests in test_hybrid_sort.py" type="tests" factoryName="Autodetect" nameIsGenerated="true">
     <module name="Tripods" />
     <option name="ENV_FILES" value="" />
