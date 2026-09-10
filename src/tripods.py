@@ -10,13 +10,42 @@ total sums of the cells that all combined tripods touch is maximum.
 
 Usage: python3 tripods.py filename
 
-author: YOUR NAME HERE
+author: Justin Spadone
 """
+
+import sys
+
+
+def read_grid():
+    grid = []
+    try:
+        with open(sys.argv[1], "r") as file:
+            line_0 = file.readline().split()
+            rows, cols = [int(x) for x in line_0]
+            print(rows, cols)
+            for line in file:
+                grid.append([int(x) for x in line.split()])
+    except FileNotFoundError, PermissionError, IsADirectoryError:
+        print("Usage: python3 tripods.py filename")
+    return grid
+
+
+def print_grid(grid):
+    if len(grid) <= 50 and len(grid[0]) <= 30:
+        for line in grid:
+            print(line)
+    else:
+        print("Too large to print!")
 
 
 def main() -> None:
-    pass  # remove this line
+    # print(sys.argv)
+    grid = read_grid()
+
+    num_tripods = int(input("How many tripods to place? "))
+    if num_tripods > len(grid) * len(grid[0]) - 4:
+        print("Too many tripods!")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
