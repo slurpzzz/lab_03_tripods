@@ -25,8 +25,9 @@ def read_grid():
             file.readline()
             for line in file:
                 grid.append([int(x) for x in line.split()])
-    except FileNotFoundError, PermissionError, IsADirectoryError:
+    except FileNotFoundError, PermissionError, IsADirectoryError, IndexError:
         print("Usage: python3 tripods.py filename")
+        sys.exit()
     return grid
 
 
@@ -115,6 +116,22 @@ def compute_tripod_locations(grid):
     return tripods
 
 
+def insertion_sort(data: list[Tripod]):
+    if len(data) <= 1:
+        return
+    for i in range(1, len(data)):
+        j = i-1
+        while data[i].sum < data[j].sum and j>=0 and i>=0:
+            data[i], data[j] = data[j], data[i]
+            i-=1
+            j-=1
+
+
+def hybrid_sort(data, k):
+    if len(data) <= k:
+        insertion_sort(data)
+
+
 def main() -> None:
     grid = read_grid()
     print(f"Rows: {len(grid)} Columns: {len(grid[0])}")
@@ -123,6 +140,7 @@ def main() -> None:
     if num_tripods > len(grid) * len(grid[0]) - 4:
         print("Too many tripods!")
     locs = compute_tripod_locations(grid)
+    insertion_sort(locs)
     for tripod in locs:
         print(f"({tripod.row}, {tripod.col}) {tripod.orientation} {tripod.sum}")
 
