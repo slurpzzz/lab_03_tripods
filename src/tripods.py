@@ -15,7 +15,8 @@ author: Justin Spadone
 
 import sys
 
-from tripod import *
+from tripod import Tripod, Orientation
+from hybrid_sort import hybrid_sort
 
 
 def read_grid():
@@ -116,57 +117,18 @@ def compute_tripod_locations(grid):
     return tripods
 
 
-def insertion_sort(data: list[Tripod]):
-    if len(data) <= 1:
-        return
-    for i in range(1, len(data)):
-        j = i - 1
-        while data[i].sum < data[j].sum and j >= 0 and i >= 0:
-            data[i], data[j] = data[j], data[i]
-            i -= 1
-            j -= 1
-
-
-def merge(left: list[Tripod], right: list[Tripod]):
-    merged = []
-    i = 0
-    j = 0
-    while i < len(left) and j < len(right):
-        if left[i].sum < right[j].sum:
-            merged.append(left[i])
-            i += 1
-        else:
-            merged.append(right[j])
-            j += 1
-    if i == len(left):
-        merged.extend(right[j:])
-    elif j == len(right):
-        merged.extend(left[i:])
-    return merged
-
-
-def hybrid_sort(data, k):
-    if len(data) <= k:
-        insertion_sort(data)
-        return data
-    if len(data) <= 1:
-        return data
-    half = len(data) // 2
-    left = hybrid_sort(data[:half], k)
-    right = hybrid_sort(data[half:], k)
-    return merge(left, right)
-
-
 def main() -> None:
     grid = read_grid()
     print(f"Rows: {len(grid)} Columns: {len(grid[0])}")
     print_grid(grid)
     num_tripods = int(input("How many tripods to place? "))
-    if num_tripods > len(grid) * len(grid[0]) - 4:
+    max_tripods = len(grid) * len(grid[0]) - 4
+    if num_tripods > max_tripods:
         print("Too many tripods!")
+        num_tripods = max_tripods
     locs = compute_tripod_locations(grid)
     locs = hybrid_sort(locs, 2)
-    for tripod in locs:
+    for tripod in locs[-num_tripods:]:
         print(f"({tripod.row}, {tripod.col}) {tripod.orientation} {tripod.sum}")
 
 
