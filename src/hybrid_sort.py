@@ -6,9 +6,11 @@ Implementation of a hybrid sorting algorithm combining Merge Sort and Insertion 
 Applies recursive Merge Sort for larger datasets and switches to Insertion Sort
 when sub-list sizes fall at or below a specified threshold (k).
 
-author: YOUR NAME HERE
+author: Justin Spadone
 """
 from tripod import Tripod
+
+DEFAULT_K: int = 15
 
 
 def insertion_sort(data: list[Tripod]):
@@ -16,10 +18,11 @@ def insertion_sort(data: list[Tripod]):
         return
     for i in range(1, len(data)):
         j = i - 1
-        while data[i].sum < data[j].sum and j >= 0 and i >= 0:
-            data[i], data[j] = data[j], data[i]
-            i -= 1
+        key = data[i]
+        while j >= 0 and key.sum < data[j].sum:
+            data[j + 1] = data[j]
             j -= 1
+        data[j + 1] = key
 
 
 def merge(left: list[Tripod], right: list[Tripod]):
@@ -27,7 +30,7 @@ def merge(left: list[Tripod], right: list[Tripod]):
     i = 0
     j = 0
     while i < len(left) and j < len(right):
-        if left[i].sum < right[j].sum:
+        if left[i].sum <= right[j].sum:
             merged.append(left[i])
             i += 1
         else:
@@ -40,7 +43,7 @@ def merge(left: list[Tripod], right: list[Tripod]):
     return merged
 
 
-def hybrid_sort(data: list[Tripod], k: int) -> list[Tripod]:
+def hybrid_sort(data: list[Tripod], k: int = DEFAULT_K) -> list[Tripod]:
     if len(data) <= k:
         insertion_sort(data)
         return data

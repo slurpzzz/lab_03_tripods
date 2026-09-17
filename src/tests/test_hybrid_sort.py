@@ -80,7 +80,6 @@ class TestHybridSort(unittest.TestCase):
         expected = sorted(tripods, key=lambda t: t.sum)
         self.assertEqual(result, expected)
 
-
     def test_varying_thresholds_k(self):
         """Verify correctness across different values of k."""
         random.seed(42)
@@ -92,6 +91,13 @@ class TestHybridSort(unittest.TestCase):
             with self.subTest(k):
                 result = hybrid_sort(list(data), k=k)
                 self.assertEqual(result, expected)
+
+    def test_default_k(self):
+        tripods = [Tripod(i, i, Orientation.NORTH, val) for i, val in
+                   enumerate([random.randint(1, 100) for _ in range(1000)])]
+        result = hybrid_sort(tripods)
+        expected = sorted(tripods, key=lambda t: t.sum)
+        self.assertEqual(result, expected)
 
 
 if __name__ == '__main__':
