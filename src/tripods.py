@@ -54,12 +54,12 @@ def print_grid(grid: list[list[int]]) -> None:
         print("Too large to print!")
 
 
-def get_optimal_orientation(grid: list[list[int]], pos: tuple[int, int]):
+def get_optimal_orientation(grid: list[list[int]], pos: tuple[int, int]) -> Orientation:
     """
-
-    :param grid:
-    :param pos:
-    :return:
+    Gets the optimal orientation a tripod could be placed at a given location
+    :param grid: The grid of points
+    :param pos: The position for the tripod
+    :return: The orientation of the tripod that gives the most points
     """
     row, col = pos
     neighbors = [(row - 1, col), (row, col + 1), (row + 1, col), (row, col - 1)]
@@ -82,7 +82,13 @@ def get_optimal_orientation(grid: list[list[int]], pos: tuple[int, int]):
 
 
 # if N,S,E,W is out of bounds, orientation is facing the other direction
-def get_optimal_tripod(grid: list[list[int]], pos: tuple[int, int]):
+def get_optimal_tripod(grid: list[list[int]], pos: tuple[int, int]) -> Tripod | None:
+    """
+    Gets the tripod with the greatest possible sum
+    :param grid: The grid of points
+    :param pos: The position for the tripod
+    :return: The tripod with the highest sum or None if no tripod can be placed
+    """
     row, col = pos
     edges = 0
     orientation = Orientation.NORTH
@@ -123,7 +129,12 @@ def get_optimal_tripod(grid: list[list[int]], pos: tuple[int, int]):
     return Tripod(row, col, orientation, total)
 
 
-def compute_tripod_locations(grid: list[list[int]]):
+def compute_tripod_locations(grid: list[list[int]]) -> list[Tripod]:
+    """
+    Populates a list full of the best tripod at each location
+    :param grid: The grid of points
+    :return: The list of the best oriented tripods at each location
+    """
     tripods = []
     for i, row in enumerate(grid):
         for j, cell in enumerate(row):
@@ -135,6 +146,10 @@ def compute_tripod_locations(grid: list[list[int]]):
 
 
 def main() -> None:
+    """
+    Main entry point of the program
+    :return: None
+    """
     grid = read_grid()
     print_grid(grid)
     num_tripods = int(input("Number of tripods: "))
