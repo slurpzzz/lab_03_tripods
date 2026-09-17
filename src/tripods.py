@@ -19,31 +19,48 @@ from tripod import Tripod, Orientation
 from hybrid_sort import hybrid_sort
 
 
-def read_grid():
+def read_grid() -> list[list[int]]:
+    """
+    Reads the 2nd command line argument as a file and parses it into a list of integers
+    :return: The 2D list of integers representing the grid
+    """
     grid = []
     try:
         with open(sys.argv[1], "r") as file:
             file.readline()
             for line in file:
                 grid.append([int(x) for x in line.split()])
-    except FileNotFoundError, PermissionError, IsADirectoryError, IndexError:
+    except (FileNotFoundError, PermissionError, IsADirectoryError, IndexError):
         print("Usage: python3 tripods.py filename")
         sys.exit()
     return grid
 
 
-def print_grid(grid):
+def print_grid(grid: list[list[int]]) -> None:
+    """
+    Prints the grid if it is small enough, otherwise prints that it is too large
+    :param grid: The 2D list of integers to print
+    :return: None
+    """
     rows = len(grid)
     cols = len(grid[0])
+    print(f"Rows: {rows} Columns: {cols}")
     if rows <= 50 and cols <= 30:
-        for line in grid:
-            print(line)
+        for row in grid:
+            for cell in row:
+                print(cell, end=' ')
+            print()
     else:
         print("Too large to print!")
-        print(rows, "x", cols)
 
 
-def get_optimal_orientation(grid, pos):
+def get_optimal_orientation(grid: list[list[int]], pos: tuple[int, int]):
+    """
+
+    :param grid:
+    :param pos:
+    :return:
+    """
     row, col = pos
     neighbors = [(row - 1, col), (row, col + 1), (row + 1, col), (row, col - 1)]
     min_val = grid[neighbors[0][0]][neighbors[0][1]]
@@ -65,48 +82,48 @@ def get_optimal_orientation(grid, pos):
 
 
 # if N,S,E,W is out of bounds, orientation is facing the other direction
-def get_optimal_tripod(grid, pos: tuple[int, int]):
+def get_optimal_tripod(grid: list[list[int]], pos: tuple[int, int]):
     row, col = pos
     edges = 0
     orientation = Orientation.NORTH
-    sum = 0
+    total = 0
     if 0 <= row - 1 < len(grid):
-        sum += grid[row - 1][col]
+        total += grid[row - 1][col]
     else:
         orientation = Orientation.SOUTH
         edges += 1
     if 0 <= col + 1 < len(grid[0]):
-        sum += grid[row][col + 1]
+        total += grid[row][col + 1]
     else:
         orientation = Orientation.WEST
         edges += 1
     if 0 <= row + 1 < len(grid):
-        sum += grid[row + 1][col]
+        total += grid[row + 1][col]
     else:
         orientation = Orientation.NORTH
         edges += 1
     if 0 <= col - 1 < len(grid[0]):
-        sum += grid[row][col - 1]
+        total += grid[row][col - 1]
     else:
         orientation = Orientation.EAST
         edges += 1
     if edges >= 2:
         return None
     if edges == 1:
-        return Tripod(row, col, orientation, sum)
+        return Tripod(row, col, orientation, total)
     orientation = get_optimal_orientation(grid, pos)
     if orientation == Orientation.NORTH:
-        sum -= grid[row + 1][col]
+        total -= grid[row + 1][col]
     elif orientation == Orientation.EAST:
-        sum -= grid[row][col - 1]
+        total -= grid[row][col - 1]
     elif orientation == Orientation.SOUTH:
-        sum -= grid[row - 1][col]
+        total -= grid[row - 1][col]
     else:
-        sum -= grid[row][col + 1]
-    return Tripod(row, col, orientation, sum)
+        total -= grid[row][col + 1]
+    return Tripod(row, col, orientation, total)
 
 
-def compute_tripod_locations(grid):
+def compute_tripod_locations(grid: list[list[int]]):
     tripods = []
     for i, row in enumerate(grid):
         for j, cell in enumerate(row):
@@ -119,17 +136,21 @@ def compute_tripod_locations(grid):
 
 def main() -> None:
     grid = read_grid()
-    print(f"Rows: {len(grid)} Columns: {len(grid[0])}")
     print_grid(grid)
-    num_tripods = int(input("How many tripods to place? "))
+    num_tripods = int(input("Number of tripods: "))
     max_tripods = len(grid) * len(grid[0]) - 4
     if num_tripods > max_tripods:
         print("Too many tripods!")
-        num_tripods = max_tripods
-    locs = compute_tripod_locations(grid)
-    locs = hybrid_sort(locs, 2)
-    for tripod in locs[-num_tripods:]:
-        print(f"({tripod.row}, {tripod.col}) {tripod.orientation} {tripod.sum}")
+        sys.exit()
+
+    tripods = compute_tripod_locations(grid)
+    tripods = hybrid_sort(tripods, 32)
+    tripods = tripods[-1:-num_tripods - 1:-1]
+    print('Optimal placement:')
+    for tripod in tripods:
+        print(f"location: ({tripod.row},{tripod.col}), orientation: {tripod.orientation.name}, sum: {tripod.sum}")
+    total = sum(tripod.sum for tripod in tripods)
+    print('Total sum:', total)
 
 
 if __name__ == "__main__":
