@@ -14,6 +14,7 @@ author: Justin Spadone
 """
 
 import sys
+from unittest import case
 
 from tripod import Tripod, Orientation
 from hybrid_sort import hybrid_sort
@@ -54,34 +55,23 @@ def print_grid(grid: list[list[int]]) -> None:
         print("Too large to print!")
 
 
-def get_optimal_orientation(grid: list[list[int]], pos: tuple[int, int]) -> Orientation:
+def invert_orientation(orientation: Orientation) -> Orientation:
     """
-    Gets the optimal orientation a tripod could be placed at a given location
-    :param grid: The grid of points
-    :param pos: The position for the tripod
-    :return: The orientation of the tripod that gives the most points
+    Inverts the cardinal direction
+    :param orientation: Orientation to invert
+    :return: Inverted orientation
     """
-    row, col = pos
-    neighbors = [(row - 1, col), (row, col + 1), (row + 1, col), (row, col - 1)]
-    min_val = grid[neighbors[0][0]][neighbors[0][1]]
-    min_index = 0
-    for index, neighbor in enumerate(neighbors):
-        if grid[neighbor[0]][neighbor[1]] < min_val:
-            min_val = grid[neighbor[0]][neighbor[1]]
-            min_index = index
-    orientation = Orientation.NORTH
-    if min_index == 0:
-        orientation = Orientation.SOUTH
-    elif min_index == 1:
-        orientation = Orientation.WEST
-    elif min_index == 2:
-        orientation = Orientation.NORTH
-    else:
-        orientation = Orientation.EAST
-    return orientation
+    match orientation:
+        case Orientation.NORTH:
+            return Orientation.SOUTH
+        case Orientation.EAST:
+            return Orientation.WEST
+        case Orientation.SOUTH:
+            return Orientation.NORTH
+        case _:
+            return Orientation.EAST
 
 
-# if N,S,E,W is out of bounds, orientation is facing the other direction
 def get_optimal_tripod(grid: list[list[int]], pos: tuple[int, int]) -> Tripod | None:
     """
     Gets the tripod with the greatest possible sum
@@ -90,42 +80,29 @@ def get_optimal_tripod(grid: list[list[int]], pos: tuple[int, int]) -> Tripod | 
     :return: The tripod with the highest sum or None if no tripod can be placed
     """
     row, col = pos
+    direction_to_index = {Orientation.NORTH: (row - 1, col), Orientation.EAST: (row, col + 1),
+                          Orientation.SOUTH: (row + 1, col), Orientation.WEST: (row, col - 1)}
+    total = 0
     edges = 0
     orientation = Orientation.NORTH
-    total = 0
-    if 0 <= row - 1 < len(grid):
-        total += grid[row - 1][col]
-    else:
-        orientation = Orientation.SOUTH
-        edges += 1
-    if 0 <= col + 1 < len(grid[0]):
-        total += grid[row][col + 1]
-    else:
-        orientation = Orientation.WEST
-        edges += 1
-    if 0 <= row + 1 < len(grid):
-        total += grid[row + 1][col]
-    else:
-        orientation = Orientation.NORTH
-        edges += 1
-    if 0 <= col - 1 < len(grid[0]):
-        total += grid[row][col - 1]
-    else:
-        orientation = Orientation.EAST
-        edges += 1
+    min_val = None
+    for key, value in direction_to_index.items():
+        try:
+            if value[0] < 0 or value[1] < 0:
+                raise IndexError
+            points = grid[value[0]][value[1]]
+            total += points
+            if edges == 0 and (min_val is None or points < min_val):
+                min_val = points
+                orientation = invert_orientation(key)
+        except IndexError:
+            edges += 1
+            orientation = invert_orientation(key)
     if edges >= 2:
         return None
     if edges == 1:
         return Tripod(row, col, orientation, total)
-    orientation = get_optimal_orientation(grid, pos)
-    if orientation == Orientation.NORTH:
-        total -= grid[row + 1][col]
-    elif orientation == Orientation.EAST:
-        total -= grid[row][col - 1]
-    elif orientation == Orientation.SOUTH:
-        total -= grid[row - 1][col]
-    else:
-        total -= grid[row][col + 1]
+    total -= min_val
     return Tripod(row, col, orientation, total)
 
 
